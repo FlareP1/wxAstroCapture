@@ -1,0 +1,152 @@
+Linux / Rasperry Pi xwAstroCapture Build and Install
+
+This build was specifically done to try and get the original ATIK  ARTEMIS cameras working on Linux.  These are the following models that use 
+USB 1.0 FTDI254 serial interface chip.  I have tested this working with the ART 285 and ART 429 cameras.
+
+ART 285
+ART 429
+ATIK 16IC
+ATIK 16HR 
+
+This repository was branch from 
+https://github.com/wxAstro/wxAstroCapture
+
+A couple of small modifications were made to allow the compilation on a Raspberry Pi4
+This was done from the Astroberry Server 2.0.3 release but should also be possible on other Raspberry PI builds
+https://www.astroberry.io/distro/astroberry-server_2.0.3.img.zip
+
+sudo apt update
+sudo apt upgrade
+
+Install the IDE and build environment
+sudo apt install codeblocks
+
+sudo apt install built-essential
+sudo apt install libgtk2.0-dev
+
+#Rebuild wxWidgets from Source (later versions 3.X did not seem compatible so used 2.8.12)
+
+#Get the repository and move to the dir name needed to match the codeblocks project/workspace file.
+cd ~
+git clone -b "WX_2_8_12" https://github.com/wxWidgets/wxWidgets.git
+mv wxWidgets/ wxWidgets-2.8.12/
+
+#Build xwWidgets - this took about 15-20 mins on a Raspberry pi4. 
+#First build the release version of wxWidgets
+cd wxWidgets-2.8.12
+mkdir build
+cd build
+sudo ../configure
+sudo make
+sudo make install
+
+#Next build the release version of wxWidgets
+cd ..
+mkdir build-debug
+cd build-debug
+sudo ../configure --enable-debug
+sudo make   
+
+#Check you can build an run a xwWidgets example
+cd samples/minimal
+sudo make
+sudo make install
+
+#Get updated version of the wxAstroCapture repository
+git clone https://github.com/FlareP1/wxAstroCapture.git
+
+#Get any missing build dependencies
+sudo apt install upx-ucl
+sudo apt install libusb-dev
+sudo apt install libv4l-dev
+
+#Launch codeblocks select the UX/Release build and build it
+codeblocks
+
+#Open AstroCapture.workspace
+#Select the wxWebcam project and build it.
+
+Both UX release and debug should build at this point.  If you have problems these are the steps that I had to follow to 
+update the project as described at the bottom of this note.
+
+Next copy the device rules files into 
+These are required to detect your camera and allow the OS access to it.
+
+#Copy rules files to map the cameras to a dev
+sudo cp 55-atik-updates.rules /etc/udev/rules.d/
+sudo cp 55-shoestring.rules /etc/udev/rules.d/
+sudo cp 00-usb-permissions.rules /etc/udev/rules.d/
+
+#Restart the rules service 
+sudo /etc/init.d/udev restart
+
+#Monitor the rules application for debugging as the camera is unplugged
+sudo udevadm control --log-priority=debug
+journalctl -f
+
+#Plug in your camera and check it is recognized and mapped correctly
+ls /dev 
+#The camera should be identified as atik_artS for the ART 285 for example
+
+#Run the application and capture some images !!!
+cd ~/wxAstroCapture/UX/bin/Release 
+./wxAstroCapture
+
+
+
+
+#Further details on updates made to the project files to make it build
+#add following paths under build options
+~/wxWidgets-2.8.12/include  complier search path  
+~/wxWidgets-2.8.12/build/lib/wx/include/gtk2-ansi-release-2.8
+
+#add additional compiler options from 
+wx-config --cxxflags  (note wx-config will give different result from the wxWidgets release and debug directories)
+-pthread -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D__WXGTK__
+
+#add to resource compiler search 
+~/wxWidgets-2.8.12/include  
+
+#Linker
+#add additioanl linker options from 
+wx-config --libs
+
+#For release
+-L/usr/local/lib -pthread 
+ -lwx_gtk2_richtext-2.8
+ -lwx_gtk2_aui-2.8
+ -lwx_gtk2_xrc-2.8
+ -lwx_gtk2_qa-2.8
+ -lwx_gtk2_html-2.8
+ -lwx_gtk2_adv-2.8
+ -lwx_gtk2_core-2.8
+ -lwx_base_xml-2.8
+ -lwx_base_net-2.8
+ -lwx_base-2.8
+ 
+#For debug
+ -L/usr/local/lib -pthread 
+ -lwx_gtk2d_richtext-2.8
+ -lwx_gtk2d_aui-2.8
+ -lwx_gtk2d_xrc-2.8
+ -lwx_gtk2d_qa-2.8
+ -lwx_gtk2d_html-2.8
+ -lwx_gtk2d_adv-2.8
+ -lwx_gtk2d_core-2.8
+ -lwx_based_xml-2.8
+ -lwx_based_net-2.8
+ -lwx_based-2.8
+ 
+ edit the 55-atik.rules file and after FTDI254 based cams section
+ change all the instances of NAME= to SYMLINK+=
+ change MODE="0660"
+ 
+ save as 55-atik-updated.rules
+ //Copy rules files to map the cameras to a dev
+ sudo cp 55-atik-updates.rules /etc/udev/rules.d/
+ sudo cp 55-shoestring.rules /etc/udev/rules.d/
+ 
+ create a new rules to give access to all usb devices
+ create a file called 00-usb-permissions.rules with the following
+ SUBSYSTEM=="usb", MODE="0660", GROUP="plugdev"
+
