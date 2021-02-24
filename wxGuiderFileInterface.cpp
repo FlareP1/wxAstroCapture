@@ -56,11 +56,13 @@ bool wxGuiderFileInterface::guideError(unsigned long timestamp  // (in)  Time st
 
       // rewind x.dat and write new line
       m_xdat->seekp (0, ios::beg);
-      (*m_xdat) << xf.char_str() << endl;
+      //Won't compile in linux
+      //(*m_xdat) << xf.char_str() << endl;
 
       // rewind y.dat and write new line
       m_ydat->seekp (0, ios::beg);
-      (*m_ydat) << yf.char_str() << endl;
+      //Won't compile in linux
+      //(*m_ydat) << yf.char_str() << endl;
 
       return true;
    }

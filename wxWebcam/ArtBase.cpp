@@ -40,7 +40,8 @@
    ArtDrv* ArtBase::m_camCcdDrv = Atik16Drv::Instance();       // Artemis Driver Linux
 //   ArtDrv* ArtBase::m_camHscDrv = ArtDrvEzFX2::Instance();   // Artemis EzFX2 driver Linux
    ArtDrv* ArtBase::m_camHscDrv = NULL;
-   ArtDrv* ArtBase::m_camSimDrv = ArtDrvSim::Instance();       // Simulation
+//   ArtDrv* ArtBase::m_camSimDrv = ArtDrvSim::Instance();       // Simulation
+   ArtDrv* ArtBase::m_camSimDrv = NULL;       // Simulation
 #endif
 
 	size_t ArtBase::m_numCameras = 0;
