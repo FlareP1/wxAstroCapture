@@ -12,8 +12,14 @@ who initially made it available free of charge, then in January 2014 released
 it as open source (see licence details below) to become a community
 maintained project on GitHub: https://github.com/wxAstro/wxAstroCapture
 
-The software runs on Windows XP/Vista, Linux Kubuntu/Ubuntu 8.04->10.04, Linux
-SuSE 10.2 and more. Max OS X is not currently supported.
+The original software runs on Windows XP/Vista, Linux Kubuntu/Ubuntu 8.04->10.04,
+ Linux SuSE 10.2 and more. Max OS X is not currently supported.
+
+Update
+======
+This repository has been updated with instuctions to allow it to be build on the 
+Raspbery Pi.  This was to allow use of the original Atik / Artemis cameras
+on the Raspberry Pi
 
 Current Release
 ===============
